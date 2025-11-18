@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+  <xs:element name="hidroponia">
+    <xs:complexType>
+      <xs:sequence>
+
+        <!-- meta -->
+        <xs:element name="meta">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="nome" type="xs:string"/>
+              <xs:element name="local" type="xs:string"/>
+              <xs:element name="versao" type="xs:string" minOccurs="0"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+
+        <!-- sensores -->
+        <xs:element name="sensores">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="sensor" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="tipo" type="xs:string"/>
+                    <xs:element name="unidade" type="xs:string"/>
+                    <xs:element name="modelo" type="xs:string" minOccurs="0"/>
+                    <xs:element name="localizacao" type="xs:string" minOccurs="0"/>
+                  </xs:sequence>
+                  <xs:attribute name="id" type="xs:ID" use="required"/>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+
+        <!-- leituras -->
+        <xs:element name="leituras">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="leitura" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="dataHora" type="xs:dateTime"/>
+                    <xs:element name="sensorRef">
+                      <xs:complexType>
+                        <xs:attribute name="ref" type="xs:IDREF" use="required"/>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="valor" type="xs:decimal"/>
+                  </xs:sequence>
+                  <xs:attribute name="unidade" type="xs:string" use="optional"/>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+
+        <!-- atuadores -->
+        <xs:element name="atuadores" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="atuador" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="tipo" type="xs:string"/>
+                    <xs:element name="comandos" minOccurs="0">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="comando" maxOccurs="unbounded">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="dataHora" type="xs:dateTime"/>
+                                <xs:element name="acao" type="xs:string"/>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute name="id" type="xs:ID" use="required"/>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+
+      </xs:sequence>
+      <xs:attribute name="id" type="xs:string" use="required"/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
