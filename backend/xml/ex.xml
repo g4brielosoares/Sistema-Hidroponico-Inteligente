@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hidroponia id="hidro-001">
+  <meta>
+    <nome>Sistema Hidropônico - Lote 1</nome>
+    <local>Fazenda Solar Verde</local>
+    <versao>1.0</versao>
+  </meta>
+
+  <sensores>
+    <sensor id="s-ph-01">
+      <tipo>pH</tipo>
+      <unidade></unidade>
+      <modelo>PHX100</modelo>
+      <localizacao>tanque principal</localizacao>
+    </sensor>
+
+    <sensor id="s-ec-01">
+      <tipo>EC</tipo>
+      <unidade>mS/cm</unidade>
+      <modelo>EC500</modelo>
+      <localizacao>tanque principal</localizacao>
+    </sensor>
+
+    <sensor id="s-temp-01">
+      <tipo>temperatura</tipo>
+      <unidade>°C</unidade>
+      <modelo>T200</modelo>
+      <localizacao>linha 2</localizacao>
+    </sensor>
+  </sensores>
+
+  <leituras>
+    <leitura unidade="">
+      <dataHora>2025-10-24T10:00:00Z</dataHora>
+      <sensorRef ref="s-ph-01"/>
+      <valor>6.2</valor>
+    </leitura>
+
+    <leitura unidade="mS/cm">
+      <dataHora>2025-10-24T10:00:00Z</dataHora>
+      <sensorRef ref="s-ec-01"/>
+      <valor>1.8</valor>
+    </leitura>
+
+    <leitura unidade="°C">
+      <dataHora>2025-10-24T10:00:00Z</dataHora>
+      <sensorRef ref="s-temp-01"/>
+      <valor>23.5</valor>
+    </leitura>
+  </leituras>
+
+  <atuadores>
+    <atuador id="a-bomba-01">
+      <tipo>bombaNutrientes</tipo>
+      <comandos>
+        <comando>
+          <dataHora>2025-10-24T09:45:00Z</dataHora>
+          <acao>ligar</acao>
+        </comando>
+      </comandos>
+    </atuador>
+  </atuadores>
+</hidroponia>
