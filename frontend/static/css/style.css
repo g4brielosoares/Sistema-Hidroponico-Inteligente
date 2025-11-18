@@ -1,0 +1,57 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  background: #0c8a3f;
+  color: white;
+  padding: 1rem;
+}
+
+header h1 {
+  margin: 0 0 0.5rem 0;
+}
+
+nav a {
+  color: white;
+  margin-right: 1rem;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+main {
+  padding: 1rem 2rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 0.5rem;
+  text-align: left;
+}
+
+th {
+  background: #f3f3f3;
+}
+
+.linha-critica {
+  background: #ffe5e5;
+}
+
+.linha-ok {
+  background: #e7ffe7;
+}
+
+#alertas {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  background: #fafafa;
+}
