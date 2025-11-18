@@ -8,6 +8,8 @@ from backend.services.xml_service import XMLService
 from backend.services.alert_service import avaliar_leitura
 from backend.models.hidroponia import Leitura, ComandoAtuador
 
+from backend.models.hidroponia import SistemaHidroponico
+
 api_bp = Blueprint("api", __name__)
 xml_service = XMLService()
 
