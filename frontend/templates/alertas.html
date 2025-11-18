@@ -1,69 +1,53 @@
 {% extends "base.html" %}
 
-{% block title %}Alertas - Sistema Hidropônico{% endblock %}
+{% block title %}Leituras & Status - Sistema Hidropônico{% endblock %}
 
 {% block content %}
-  <div id="page-alertas"></div>
+<div class="page page-alertas"></div>
 
   <section class="card">
     <div class="card-header">
-      <h2>Alertas Ativos</h2>
-      <div class="card-actions">
-        <button id="btn-simular-ciclo" class="btn-primary">Simular ciclo</button>
-        <button id="btn-limpar-leituras" class="btn-danger">Limpar histórico (XML)</button>
+      <h2>Gerenciamento de Leituras</h2>
+      <div class="card-actions filtro">
+        <label>
+          Início:
+          <input type="datetime-local" id="exportInicio" />
+        </label>
+        <label>
+          Fim:
+          <input type="datetime-local" id="exportFim" />
+        </label>
+        <button id="btn-exportar-xml" class="btn-secondary">
+          Exportar XML
+        </button>
+        <button id="btn-limpar-leituras" class="btn-danger">
+          Limpar leituras (XML)
+        </button>
       </div>
     </div>
-
-    <section class="card">
-      <div class="card-header">
-        <h2>Alertas e Leituras</h2>
-        <div class="card-actions">
-          <label>
-            Início:
-            <input type="datetime-local" id="exportInicio">
-          </label>
-          <label>
-            Fim:
-            <input type="datetime-local" id="exportFim">
-          </label>
-          <button id="btn-exportar-xml" class="btn-secondary">
-            Exportar XML
-          </button>
-          <button id="btn-limpar-leituras" class="btn-danger">
-            Limpar leituras (XML)
-          </button>
-        </div>
-      </div>
-   
-      <table id="tabela-alertas" class="tabela">
-        <thead>
-          <tr>
-            <th>Data/Hora</th>
-            <th>Sensor</th>
-            <th>Tipo</th>
-            <th>Valor</th>
-            <th>Mensagem</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </section>
+    <p id="status-alertas" class="status"></p>
   </section>
 
   <section class="card">
-    <h2>Leituras recentes</h2>
-    <table id="tabela-leituras" class="tabela">
-      <thead>
-        <tr>
-          <th>Data/Hora</th>
-          <th>Sensor</th>
-          <th>Tipo</th>
-          <th>Valor</th>
-          <th>Unidade</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+    <div class="card-header">
+      <h2>Tabela de Leituras</h2>
+    </div>
+    <div class="tabela-wrapper">
+      <table id="tabela-leituras" class="tabela">
+        <thead>
+          <tr>
+            <th>Sensor</th>
+            <th>Tipo</th>
+            <th>Valor</th>
+            <th>Unidade</th>
+            <th>Status</th>
+            <th>Data/Hora</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- preenchido via JS -->
+        </tbody>
+      </table>
+    </div>
   </section>
 {% endblock %}

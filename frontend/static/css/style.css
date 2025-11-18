@@ -24,7 +24,7 @@ body.dark-theme {
   margin-left: 1rem;
   text-decoration: none;
   font-weight: 500;
-  padding: 0.25rem 0.5rem;
+  padding: 0.5rem 1.5rem;
   border-radius: 999px;
 }
 
@@ -34,7 +34,7 @@ body.dark-theme {
 }
 
 .main {
-  padding: 1.5rem 2rem;
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -43,22 +43,25 @@ body.dark-theme {
 /* CARDS / BLOCOS */
 
 .card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
   background: #020617;
   border-radius: 16px;
-  padding: 1.25rem 1.5rem;
+  padding: 1.5rem;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
   border: 1px solid #1e293b;
+  justify-content: center;
 }
 
 .card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  gap: 1.1rem;
 }
 
-.card-header h2 {
+.card h2 {
   margin: 0;
 }
 
@@ -81,13 +84,30 @@ body.dark-theme {
   color: #9ca3af;
 }
 
+.filtro input,
+.filtro select {
+  background: #020617;
+  color: #e5e7eb;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 0.6rem;
+  font-size: 0.9rem;
+}
+
+.filtro input:focus,
+.filtro select:focus {
+  outline: none;
+  border-color: #22c55e;
+  box-shadow: 0 0 0 1px #22c55e33;
+}
+
 .campo input,
 .campo select {
   background: #020617;
   color: #e5e7eb;
   border: 1px solid #374151;
   border-radius: 8px;
-  padding: 0.45rem 0.6rem;
+  padding: 0.6rem;
   font-size: 0.9rem;
 }
 
@@ -105,7 +125,8 @@ button {
   border-radius: 999px;
   border: none;
   font-size: 0.9rem;
-  padding: 0.45rem 0.9rem;
+  padding: 0.5rem 1.5rem;
+  align-self: center;
 }
 
 .btn-primary {
@@ -164,25 +185,35 @@ button {
   background: #111827;
 }
 
-.linha-critica {
+/* linha fora da faixa ideal */
+.tabela tr.fora-faixa {
+  background-color: rgba(255, 80, 80, 0.2);
+}
+
+body.theme-dark .tabela tr.fora-faixa {
+  background-color: rgba(255, 80, 80, 0.3);
+}
+
+
+.fora-faixa {
   background: #450a0a !important;
 }
 
-.linha-ok {
+.dentro-faixa {
   background: #052e16 !important;
 }
 
 /* STATUS */
 
-.status-msg {
-  margin-left: 0.5rem;
+.status {
   font-size: 0.85rem;
+  margin: 0;
 }
 
-.status-msg.ok {
+.status.ok {
   color: #4ade80;
 }
 
-.status-msg.erro {
+.status.erro {
   color: #fca5a5;
 }

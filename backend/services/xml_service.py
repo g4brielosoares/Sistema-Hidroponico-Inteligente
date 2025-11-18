@@ -295,6 +295,20 @@ class XMLService:
     # ------------------------------------------------------------------
 
     def listar_leituras(self):
+        """
+        Retorna leituras como lista de dicts:
+        {
+          "sensorId": ...,
+          "tipo": ...,
+          "unidade": ...,
+          "dataHora": ...,
+          "valor": float,
+          "status": "dentro" | "abaixo" | "acima" | "sem-faixa",
+          "mensagem": str,
+          "foraFaixa": bool
+        }
+        Ordenado da leitura mais recente para a mais antiga.
+        """
         tree = self._load_tree()
         root = tree.getroot()
 
@@ -308,10 +322,37 @@ class XMLService:
             sensor_ref = l.get("sensorRef")
             unidade = l.get("unidade")
             data_hora = l.findtext("dataHora")
-            valor = l.findtext("valor")
+            valor_str = l.findtext("valor")
 
             sensor = sensores_map.get(sensor_ref)
             tipo = sensor.findtext("tipo") if sensor is not None else None
+
+            status = "sem-faixa"
+            mensagem = "Faixa não configurada para esse tipo de sensor."
+            fora_faixa = False
+
+            try:
+                valor_dec = Decimal(valor_str)
+                valor_float = float(valor_dec)
+            except Exception:
+                valor_dec = None
+                valor_float = None
+
+            faixa = FAIXAS.get(tipo)
+            if faixa and valor_dec is not None:
+                minimo, maximo = faixa
+                if valor_dec < minimo:
+                    status = "abaixo"
+                    mensagem = f"{tipo} abaixo da faixa ideal ({valor_dec} < {minimo})"
+                    fora_faixa = True
+                elif valor_dec > maximo:
+                    status = "acima"
+                    mensagem = f"{tipo} acima da faixa ideal ({valor_dec} > {maximo})"
+                    fora_faixa = True
+                else:
+                    status = "dentro"
+                    mensagem = "Dentro da faixa ideal."
+                    fora_faixa = False
 
             leituras.append(
                 {
@@ -319,11 +360,14 @@ class XMLService:
                     "tipo": tipo,
                     "unidade": unidade,
                     "dataHora": data_hora,
-                    "valor": float(valor),
+                    "valor": valor_float,
+                    "status": status,
+                    "mensagem": mensagem,
+                    "foraFaixa": fora_faixa,
                 }
             )
 
-        leituras.sort(key=lambda x: x["dataHora"], reverse=True)
+        leituras.sort(key=lambda x: x["dataHora"] or "", reverse=True)
         return leituras
 
     def limpar_leituras(self) -> None:

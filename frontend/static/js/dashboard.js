@@ -1,63 +1,102 @@
-const API_KEY = "chave-dev-exemplo";
+// frontend/static/js/dashboard.js
 
-const unidadeFriendly = {
-  "°C": "°C (Graus Celsius)",
-  "mS/cm": "mS/cm (Condutividade elétrica)",
-  "%": "% (Percentual)",
-  "lux": "lux (Luminosidade)",
-  "pH": "pH",
-};
-
-function formatUnidade(u) {
-  if (!u) return "";
-  return unidadeFriendly[u] || u;
-}
-
-function formatStatus(status) {
-  switch (status) {
-    case "ok":
-      return "Dentro da faixa ideal";
-    case "critico-baixo":
-      return "Abaixo da faixa ideal";
-    case "critico-alto":
-      return "Acima da faixa ideal";
-    default:
-      return "Desconhecido";
-  }
-}
-
-/* ---------- API AUX ---------- */
+// ======================= HELPERS DE API =======================
 
 async function apiGet(url) {
   const resp = await fetch(url);
-  return resp.json();
-}
-
-async function apiPost(url, body) {
-  const resp = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  return resp.json().then((data) => ({ status: resp.status, data }));
+  const data = await resp.json().catch(() => ({}));
+  return { status: resp.status, data };
 }
 
 async function apiDelete(url) {
-  const resp = await fetch(url, { method: "DELETE" });
-  return resp.json();
+  const resp = await fetch(url, {
+    method: "DELETE",
+  });
+  const data = await resp.json().catch(() => ({}));
+  return { status: resp.status, data };
 }
 
-/* ---------- PÁGINA: SENSORES ---------- */
+/**
+ * POST genérico.
+ * Se asDevice = true, manda o X-API-KEY do "gateway" (dispositivo).
+ */
+async function apiPost(url, body = {}, { asDevice = false } = {}) {
+  const headers = {
+    "Content-Type": "application/json",
+  };
+
+  if (asDevice) {
+    // MESMO VALOR definido em Config.DEVICE_API_KEY no backend
+    headers["X-API-KEY"] = "MEU_TOKEN_DISPOSITIVO_SUPER_SECRETO";
+  }
+
+  const resp = await fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+  });
+
+  let data = {};
+  const contentType = resp.headers.get("Content-Type") || "";
+  if (contentType.includes("application/json")) {
+    data = await resp.json().catch(() => ({}));
+  }
+
+  return { status: resp.status, data };
+}
+
+// ======================= HELPERS DE FORMATAÇÃO =======================
+
+function formatUnidade(unidade) {
+  if (!unidade) return "-";
+  switch (unidade) {
+    case "°C":
+      return "°C (Graus Celsius)";
+    case "mS/cm":
+      return "mS/cm (Condutividade)";
+    case "%":
+      return "% (Percentual)";
+    case "lux":
+      return "lux (Luminosidade)";
+    default:
+      return unidade;
+  }
+}
+
+function formatDataHora(iso) {
+  if (!iso) return "-";
+  try {
+    const dt = new Date(iso);
+    return dt.toLocaleString();
+  } catch {
+    return iso;
+  }
+}
+
+function formatValor(v) {
+  if (v === null || v === undefined || isNaN(v)) return "-";
+  return Number(v).toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+// ======================= SENSORES =======================
 
 async function carregarSensores() {
-  const tbody = document.querySelector("#tabela-sensores tbody");
-  if (!tbody) return;
+  const tabela = document.getElementById("tabela-sensores");
+  if (!tabela) return;
 
-  let dados = await apiGet("/api/sensores");
+  const tbody = tabela.querySelector("tbody");
+  const { status, data } = await apiGet("/api/sensores");
+  if (status !== 200) return;
+
   tbody.innerHTML = "";
 
-  // último cadastrado vem primeiro
-  dados.slice().reverse().forEach((s) => {
+  // data já vem com último primeiro do backend, mas, para garantir:
+  const sensores = data.slice();
+
+  sensores.forEach((s) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${s.id}</td>
@@ -71,254 +110,261 @@ async function carregarSensores() {
 }
 
 function initSensoresPage() {
-  const marker = document.getElementById("page-sensores");
-  if (!marker) return;
-
   const form = document.getElementById("form-sensor");
+  const tabela = document.getElementById("tabela-sensores");
+  if (!form || !tabela) return; // não está na página de sensores
+
   const statusSpan = document.getElementById("status-sensor");
   const btnLimpar = document.getElementById("btn-limpar-sensores");
 
-  if (form) {
-        form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const id = document.getElementById("sensorId").value.trim();
-      const tipo = document.getElementById("sensorTipo").value;
-      const modelo = document.getElementById("sensorModelo").value.trim();
-      const localizacao = document.getElementById("sensorLocal").value.trim();
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-      if (!id || !tipo) {
-        statusSpan.textContent = "Preencha os campos obrigatórios.";
+    const id = document.getElementById("sensorId").value.trim();
+    const tipo = document.getElementById("sensorTipo").value;
+    const modelo = document.getElementById("sensorModelo").value.trim();
+    const localizacao = document.getElementById("sensorLocal").value.trim();
+
+    if (!id || !tipo) {
+      if (statusSpan) {
+        statusSpan.textContent = "Preencha ID e tipo.";
         statusSpan.classList.add("erro");
-        return;
       }
+      return;
+    }
 
-      const { status, data } = await apiPost("/api/sensores", {
-        id,
-        tipo,
-        modelo: modelo || null,
-        localizacao: localizacao || null,
-      });
+    const { status, data } = await apiPost("/api/sensores", {
+      id,
+      tipo,
+      modelo: modelo || null,
+      localizacao: localizacao || null,
+    });
 
-      if (status === 201) {
-        statusSpan.textContent = data.message;
+    if (status === 201) {
+      if (statusSpan) {
+        statusSpan.textContent = data.message || "Sensor cadastrado.";
         statusSpan.classList.remove("erro");
         statusSpan.classList.add("ok");
-        form.reset();
-        await carregarSensores();
-      } else {
+      }
+      form.reset();
+      await carregarSensores();
+    } else {
+      if (statusSpan) {
         statusSpan.textContent = data.error || "Erro ao cadastrar sensor.";
         statusSpan.classList.remove("ok");
         statusSpan.classList.add("erro");
       }
-    });
-  }
+    }
+  });
 
   if (btnLimpar) {
-  btnLimpar.addEventListener("click", async () => {
-    const res = await apiDelete("/api/sensores");
-    if (res.error) {
-      alert("Erro ao limpar sensores: " + res.error);
-    } else {
-      alert(res.message || "Sensores limpos.");
-    }
-    await carregarSensores();
-  });
-}
+    btnLimpar.addEventListener("click", async () => {
+      const confirma = confirm(
+        "Tem certeza que deseja limpar os sensores do XML?"
+      );
+      if (!confirma) return;
+
+      const { status, data } = await apiDelete("/api/sensores");
+      if (status === 200) {
+        if (statusSpan) {
+          statusSpan.textContent = data.message || "Sensores limpos.";
+          statusSpan.classList.remove("erro");
+          statusSpan.classList.add("ok");
+        }
+        await carregarSensores();
+      } else {
+        if (statusSpan) {
+          statusSpan.textContent = data.error || "Erro ao limpar sensores.";
+          statusSpan.classList.remove("ok");
+          statusSpan.classList.add("erro");
+        }
+      }
+    });
+  }
 
   carregarSensores();
 }
 
-/* ---------- PÁGINA: ATUADORES ---------- */
+// ======================= ATUADORES =======================
 
 async function carregarAtuadores() {
-  const tbody = document.querySelector("#tabela-atuadores tbody");
-  if (!tbody) return;
+  const tabela = document.getElementById("tabela-atuadores");
+  if (!tabela) return;
 
-  let dados = await apiGet("/api/atuadores");
+  const tbody = tabela.querySelector("tbody");
+  const { status, data } = await apiGet("/api/atuadores");
+  if (status !== 200) return;
+
   tbody.innerHTML = "";
 
-  // atuadores: mais novo primeiro
-  dados.slice().reverse().forEach((a) => {
-    // comandos também: mais recente em cima
-    const comandosOrdenados = (a.comandos || []).slice().sort(
-      (c1, c2) => new Date(c2.dataHora) - new Date(c1.dataHora)
-    );
+  const atuadores = data.slice();
 
-    let comandosHTML = "";
-    if (!comandosOrdenados.length) {
-      comandosHTML = "<em>Nenhum comando registrado</em>";
-    } else {
-      comandosHTML = "<ul>";
-      comandosOrdenados.forEach((c) => {
-        comandosHTML += `<li>${new Date(c.dataHora).toLocaleString()} — ${c.acao}</li>`;
-      });
-      comandosHTML += "</ul>";
-    }
+  atuadores.forEach((a) => {
+    const ultimo = a.ultimoComando
+      ? `${formatDataHora(a.ultimoComando.dataHora)} (${a.ultimoComando.acao})`
+      : "-";
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${a.id}</td>
       <td>${a.tipo}</td>
-      <td>${comandosHTML}</td>
+      <td>${ultimo}</td>
+      <td>${(a.comandos || []).length}</td>
     `;
     tbody.appendChild(tr);
   });
 }
 
 function initAtuadoresPage() {
-  const marker = document.getElementById("page-atuadores");
-  if (!marker) return;
-
   const form = document.getElementById("form-atuador");
+  const tabela = document.getElementById("tabela-atuadores");
+  if (!form || !tabela) return;
+
   const statusSpan = document.getElementById("status-atuador");
   const btnLimpar = document.getElementById("btn-limpar-atuadores");
 
-  if (form) {
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const id = document.getElementById("atuadorId").value.trim();
-      const tipo = document.getElementById("atuadorTipo").value;
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-      if (!id || !tipo) {
-        statusSpan.textContent = "Preencha os campos obrigatórios.";
+    const id = document.getElementById("atuadorId").value.trim();
+    const tipo = document.getElementById("atuadorTipo").value.trim();
+
+    if (!id || !tipo) {
+      if (statusSpan) {
+        statusSpan.textContent = "Preencha ID e tipo.";
         statusSpan.classList.add("erro");
-        return;
       }
+      return;
+    }
 
-      const { status, data } = await apiPost("/api/atuadores", {
-        id,
-        tipo,
-      });
+    const { status, data } = await apiPost("/api/atuadores", {
+      id,
+      tipo,
+    });
 
-      if (status === 201) {
-        statusSpan.textContent = data.message;
+    if (status === 201) {
+      if (statusSpan) {
+        statusSpan.textContent = data.message || "Atuador cadastrado.";
         statusSpan.classList.remove("erro");
         statusSpan.classList.add("ok");
-        form.reset();
-        await carregarAtuadores();
-      } else {
+      }
+      form.reset();
+      await carregarAtuadores();
+    } else {
+      if (statusSpan) {
         statusSpan.textContent = data.error || "Erro ao cadastrar atuador.";
         statusSpan.classList.remove("ok");
         statusSpan.classList.add("erro");
       }
-    });
-  }
+    }
+  });
 
   if (btnLimpar) {
-  btnLimpar.addEventListener("click", async () => {
-    const res = await apiDelete("/api/atuadores");
-    if (res.error) {
-      alert("Erro ao limpar atuadores: " + res.error);
-    } else {
-      alert(res.message || "Atuadores limpos.");
-    }
-    await carregarAtuadores();
-  });
-}
+    btnLimpar.addEventListener("click", async () => {
+      const confirma = confirm(
+        "Tem certeza que deseja limpar os atuadores do XML?"
+      );
+      if (!confirma) return;
+
+      const { status, data } = await apiDelete("/api/atuadores");
+      if (status === 200) {
+        if (statusSpan) {
+          statusSpan.textContent = data.message || "Atuadores limpos.";
+          statusSpan.classList.remove("erro");
+          statusSpan.classList.add("ok");
+        }
+        await carregarAtuadores();
+      } else {
+        if (statusSpan) {
+          statusSpan.textContent = data.error || "Erro ao limpar atuadores.";
+          statusSpan.classList.remove("ok");
+          statusSpan.classList.add("erro");
+        }
+      }
+    });
+  }
 
   carregarAtuadores();
 }
 
-/* ---------- PÁGINA: ALERTAS ---------- */
+// ======================= LEITURAS / ALERTAS (PÁGINA ALERTAS) =======================
 
-async function carregarAlertasTabela() {
-  const tbody = document.querySelector("#tabela-alertas tbody");
-  if (!tbody) return;
+async function carregarLeituras() {
+  const tabela = document.getElementById("tabela-leituras");
+  if (!tabela) return;
 
-  let dados = await apiGet("/api/alertas");
+  const tbody = tabela.querySelector("tbody");
+  const { status, data } = await apiGet("/api/leituras");
+  if (status !== 200) return;
+
   tbody.innerHTML = "";
 
-  if (dados.length === 0) {
+  data.forEach((l) => {
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td colspan="5"><em>Sem alertas no momento.</em></td>`;
-    tbody.appendChild(tr);
-    return;
-  }
 
-  // mais recente primeiro
-  dados.sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora));
-
-  dados.forEach((a) => {
-    const tr = document.createElement("tr");
-    tr.classList.add("linha-critica");
-    tr.innerHTML = `
-      <td>${new Date(a.dataHora).toLocaleString()}</td>
-      <td>${a.sensorId}</td>
-      <td>${a.tipo}</td>
-      <td>${a.valor}</td>
-      <td>${a.mensagem}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-async function carregarLeiturasTabelaSimples() {
-  const tbody = document.querySelector("#tabela-leituras tbody");
-  if (!tbody) return;
-
-  let dados = await apiGet("/api/leituras");
-  tbody.innerHTML = "";
-
-  // mais recente primeiro
-  dados.sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora));
-
-  dados.forEach((l) => {
-    const tr = document.createElement("tr");
-    if (l.status === "ok") tr.classList.add("linha-ok");
-    if (l.status && l.status.startsWith("critico")) tr.classList.add("linha-critica");
+    // se estiver fora da faixa, aplica a classe CSS
+    if (l.foraFaixa) {
+      tr.classList.add("fora-faixa");
+    }
 
     tr.innerHTML = `
-      <td>${new Date(l.dataHora).toLocaleString()}</td>
       <td>${l.sensorId}</td>
-      <td>${l.tipo || ""}</td>
-      <td>${l.valor}</td>
+      <td>${l.tipo || "-"}</td>
+      <td>${formatValor(l.valor)}</td>
       <td>${formatUnidade(l.unidade)}</td>
-      <td>${formatStatus(l.status)}</td>
+      <td>${l.mensagem}</td>
+      <td>${formatDataHora(l.dataHora)}</td>
     `;
+
     tbody.appendChild(tr);
   });
 }
 
 function toIsoWithZFromLocal(localValue) {
-  // localValue vem do input datetime-local (ex: "2025-10-24T10:00")
   if (!localValue) return null;
-  // assume timezone local como UTC para fins acadêmicos
+  // datetime-local vem sem segundos, adiciono ":00Z"
   return localValue + ":00Z";
 }
 
 function initAlertasPage() {
-  const marker = document.getElementById("page-alertas");
-  if (!marker) return;
+  const tabelaLeituras = document.getElementById("tabela-leituras");
+  if (!tabelaLeituras) return; // não está na página de alertas
 
-  const btnSimular = document.getElementById("btn-simular-ciclo");
-  const btnLimpar = document.getElementById("btn-limpar-leituras");
+  const btnLimparLeituras = document.getElementById("btn-limpar-leituras");
+  const btnExportXml = document.getElementById("btn-exportar-xml");
+  const inputInicio = document.getElementById("exportInicio");
+  const inputFim = document.getElementById("exportFim");
+  const statusSpan = document.getElementById("status-alertas");
 
-  if (btnSimular) {
-    btnSimular.addEventListener("click", async () => {
-      await apiPost("/api/simulacao/tick", {});
-      await carregarLeiturasTabelaSimples();
-      await carregarAlertasTabela();
+  // botão de limpar leituras (DELETE /api/leituras)
+  if (btnLimparLeituras) {
+    btnLimparLeituras.addEventListener("click", async () => {
+      const confirma = confirm(
+        "Tem certeza que deseja limpar o histórico de leituras no XML?"
+      );
+      if (!confirma) return;
+
+      const { status, data } = await apiDelete("/api/leituras");
+      if (status === 200) {
+        if (statusSpan) {
+          statusSpan.textContent = data.message || "Leituras limpas.";
+          statusSpan.classList.remove("erro");
+          statusSpan.classList.add("ok");
+        }
+        await carregarLeituras();
+      } else {
+        if (statusSpan) {
+          statusSpan.textContent = data.error || "Erro ao limpar leituras.";
+          statusSpan.classList.remove("ok");
+          statusSpan.classList.add("erro");
+        }
+      }
     });
   }
 
-  if (btnLimpar) {
-  btnLimpar.addEventListener("click", async () => {
-    const res = await apiDelete("/api/leituras");
-    if (res.error) {
-      alert("Erro ao limpar histórico: " + res.error);
-    } else {
-      alert(res.message || "Histórico limpo.");
-    }
-    await carregarLeiturasTabelaSimples();
-    await carregarAlertasTabela();
-  });
-
-  const btnExport = document.getElementById("btn-exportar-xml");
-  const inputInicio = document.getElementById("exportInicio");
-  const inputFim = document.getElementById("exportFim");
-
-  if (btnExport) {
-    btnExport.addEventListener("click", () => {
+  // botão de exportar XML filtrado por data (GET /api/exportar/xml)
+  if (btnExportXml) {
+    btnExportXml.addEventListener("click", () => {
       const inicioLocal = inputInicio.value;
       const fimLocal = inputFim.value;
 
@@ -334,27 +380,30 @@ function initAlertasPage() {
         inicioIso
       )}&fim=${encodeURIComponent(fimIso)}`;
 
-      // abre o download do XML em nova aba
       window.open(url, "_blank");
     });
   }
+
+  // loop de simulação "tempo real"
+  async function tickSimulacao() {
+    // chama o "gateway" com X-API-KEY
+    await apiPost("/api/simulacao/tick", {}, { asDevice: true });
+    await apiPost("/api/sync-pendentes", {}, { asDevice: true });
+
+    await carregarLeituras();
+  }
+
+  // primeira carga
+  carregarLeituras();
+  tickSimulacao();
+
+  // intervalo periódico
+  setInterval(tickSimulacao, 5000);
 }
 
-  // carga inicial
-  carregarLeiturasTabelaSimples();
-  carregarAlertasTabela();
+// ======================= BOOTSTRAP =======================
 
-  // atualização automática leve
-  setInterval(async () => {
-    await apiPost("/api/simulacao/tick", {});
-    await carregarLeiturasTabelaSimples();
-    await carregarAlertasTabela();
-  }, 5000);
-}
-
-/* ---------- INIT GERAL ---------- */
-
-window.addEventListener("load", () => {
+document.addEventListener("DOMContentLoaded", () => {
   initSensoresPage();
   initAtuadoresPage();
   initAlertasPage();
