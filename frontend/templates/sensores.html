@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Sensores - Sistema Hidropônico{% endblock %}
+
+{% block content %}
+  <div id="page-sensores"></div>
+
+  <section class="card">
+    <h2>Cadastro de Sensores</h2>
+    <form id="form-sensor">
+      <div class="campo">
+        <label for="sensorId">ID do Sensor</label>
+        <input type="text" id="sensorId" name="sensorId" placeholder="s-ph-01" required>
+      </div>
+
+      <div class="campo">
+        <label for="sensorTipo">Tipo</label>
+        <select id="sensorTipo" name="sensorTipo" required>
+          <option value="">Selecione</option>
+          <option value="pH">pH</option>
+          <option value="EC">EC (Condutividade)</option>
+          <option value="temperatura">Temperatura</option>
+          <option value="nível">Nível</option>
+          <option value="luminosidade">Luminosidade</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label>Unidade</label>
+        <input type="text" value="Definida automaticamente pelo tipo do sensor" disabled>
+      </div>
+
+
+      <div class="campo">
+        <label for="sensorModelo">Modelo</label>
+        <input type="text" id="sensorModelo" name="sensorModelo" placeholder="PHX100">
+      </div>
+
+      <div class="campo">
+        <label for="sensorLocal">Localização</label>
+        <input type="text" id="sensorLocal" name="sensorLocal" placeholder="tanque principal">
+      </div>
+
+      <button type="submit" class="btn-primary">Salvar Sensor</button>
+      <span id="status-sensor" class="status-msg"></span>
+    </form>
+  </section>
+
+  <section class="card">
+    <div class="card-header">
+      <h2>Sensores Cadastrados</h2>
+      <button id="btn-limpar-sensores" class="btn-danger">Limpar sensores (XML)</button>
+    </div>
+
+    <table id="tabela-sensores" class="tabela">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Tipo</th>
+          <th>Unidade</th>
+          <th>Modelo</th>
+          <th>Localização</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+{% endblock %}

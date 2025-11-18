@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Alertas - Sistema Hidropônico{% endblock %}
+
+{% block content %}
+  <div id="page-alertas"></div>
+
+  <section class="card">
+    <div class="card-header">
+      <h2>Alertas Ativos</h2>
+      <div class="card-actions">
+        <button id="btn-simular-ciclo" class="btn-primary">Simular ciclo</button>
+        <button id="btn-limpar-leituras" class="btn-danger">Limpar histórico (XML)</button>
+      </div>
+    </div>
+
+    <table id="tabela-alertas" class="tabela">
+      <thead>
+        <tr>
+          <th>Data/Hora</th>
+          <th>Sensor</th>
+          <th>Tipo</th>
+          <th>Valor</th>
+          <th>Mensagem</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2>Leituras recentes</h2>
+    <table id="tabela-leituras" class="tabela">
+      <thead>
+        <tr>
+          <th>Data/Hora</th>
+          <th>Sensor</th>
+          <th>Tipo</th>
+          <th>Valor</th>
+          <th>Unidade</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+{% endblock %}

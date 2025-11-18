@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Atuadores - Sistema Hidropônico{% endblock %}
+
+{% block content %}
+  <div id="page-atuadores"></div>
+
+  <section class="card">
+    <h2>Cadastro de Atuadores</h2>
+    <form id="form-atuador">
+      <div class="campo">
+        <label for="atuadorId">ID do Atuador</label>
+        <input type="text" id="atuadorId" name="atuadorId" placeholder="a-bomba-01" required>
+      </div>
+
+      <div class="campo">
+        <label for="atuadorTipo">Tipo</label>
+        <select id="atuadorTipo" name="atuadorTipo" required>
+          <option value="">Selecione</option>
+          <option value="bombaNutrientes">Bomba de nutrientes</option>
+          <option value="valvula">Válvula</option>
+          <option value="dosador">Dosador</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn-primary">Salvar Atuador</button>
+      <span id="status-atuador" class="status-msg"></span>
+    </form>
+  </section>
+
+  <section class="card">
+    <div class="card-header">
+      <h2>Atuadores e comandos</h2>
+      <button id="btn-limpar-atuadores" class="btn-danger">Limpar atuadores (XML)</button>
+    </div>
+
+    <table id="tabela-atuadores" class="tabela">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Tipo</th>
+          <th>Comandos Registrados</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+{% endblock %}
