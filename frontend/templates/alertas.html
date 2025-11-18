@@ -14,18 +14,40 @@
       </div>
     </div>
 
-    <table id="tabela-alertas" class="tabela">
-      <thead>
-        <tr>
-          <th>Data/Hora</th>
-          <th>Sensor</th>
-          <th>Tipo</th>
-          <th>Valor</th>
-          <th>Mensagem</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+    <section class="card">
+      <div class="card-header">
+        <h2>Alertas e Leituras</h2>
+        <div class="card-actions">
+          <label>
+            Início:
+            <input type="datetime-local" id="exportInicio">
+          </label>
+          <label>
+            Fim:
+            <input type="datetime-local" id="exportFim">
+          </label>
+          <button id="btn-exportar-xml" class="btn-secondary">
+            Exportar XML
+          </button>
+          <button id="btn-limpar-leituras" class="btn-danger">
+            Limpar leituras (XML)
+          </button>
+        </div>
+      </div>
+   
+      <table id="tabela-alertas" class="tabela">
+        <thead>
+          <tr>
+            <th>Data/Hora</th>
+            <th>Sensor</th>
+            <th>Tipo</th>
+            <th>Valor</th>
+            <th>Mensagem</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
   </section>
 
   <section class="card">

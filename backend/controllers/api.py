@@ -1,13 +1,28 @@
-from flask import Blueprint, jsonify, request
+from datetime import datetime
+from functools import wraps
 
+from flask import Blueprint, jsonify, request, Response
+
+from backend.config import Config
 from backend.services.xml_service import XMLService
-
 
 api_bp = Blueprint("api", __name__)
 xml_service = XMLService()
 
 
-# -------- SENSORES --------
+# ---------- helper de autenticação de dispositivo ----------
+
+def require_device_auth(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        api_key = request.headers.get("X-API-KEY")
+        if api_key != Config.DEVICE_API_KEY:
+            return jsonify({"error": "Não autorizado (dispositivo)."}), 401
+        return f(*args, **kwargs)
+    return wrapper
+
+
+# ---------------------- SENSORES ---------------------------
 
 @api_bp.get("/api/sensores")
 def api_listar_sensores():
@@ -17,7 +32,7 @@ def api_listar_sensores():
 
 @api_bp.post("/api/sensores")
 def api_cadastrar_sensor():
-    data = request.json
+    data = request.json or {}
     try:
         xml_service.cadastrar_sensor(
             {
@@ -27,8 +42,9 @@ def api_cadastrar_sensor():
                 "localizacao": data.get("localizacao"),
             }
         )
-
         return jsonify({"message": "Sensor cadastrado com sucesso."}), 201
+    except KeyError:
+        return jsonify({"error": "Campos obrigatórios: id, tipo."}), 400
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
     except Exception as e:
@@ -44,7 +60,7 @@ def api_limpar_sensores():
         return jsonify({"error": f"Erro ao limpar sensores: {str(e)}"}), 500
 
 
-# -------- ATUADORES --------
+# ---------------------- ATUADORES ---------------------------
 
 @api_bp.get("/api/atuadores")
 def api_listar_atuadores():
@@ -54,7 +70,7 @@ def api_listar_atuadores():
 
 @api_bp.post("/api/atuadores")
 def api_cadastrar_atuador():
-    data = request.json
+    data = request.json or {}
     try:
         xml_service.cadastrar_atuador(
             {
@@ -63,6 +79,8 @@ def api_cadastrar_atuador():
             }
         )
         return jsonify({"message": "Atuador cadastrado com sucesso."}), 201
+    except KeyError:
+        return jsonify({"error": "Campos obrigatórios: id, tipo."}), 400
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
     except Exception as e:
@@ -78,7 +96,7 @@ def api_limpar_atuadores():
         return jsonify({"error": f"Erro ao limpar atuadores: {str(e)}"}), 500
 
 
-# -------- LEITURAS / ALERTAS / SIMULAÇÃO --------
+# ---------------------- LEITURAS / ALERTAS ---------------------------
 
 @api_bp.get("/api/leituras")
 def api_listar_leituras():
@@ -101,10 +119,67 @@ def api_listar_alertas():
     return jsonify(alertas)
 
 
+# ---------------------- SIMULAÇÃO (gateway) ---------------------------
+
 @api_bp.post("/api/simulacao/tick")
+@require_device_auth
 def api_simulacao_tick():
     try:
         novas = xml_service.simular_ciclo()
         return jsonify({"novasLeituras": novas})
     except Exception as e:
         return jsonify({"error": f"Erro na simulação: {str(e)}"}), 500
+
+
+@api_bp.post("/api/sync-pendentes")
+@require_device_auth
+def api_sync_pendentes():
+    try:
+        qtd = xml_service.sincronizar_pendentes()
+        return jsonify({"sincronizadas": qtd})
+    except Exception as e:
+        return jsonify({"error": f"Erro na sincronização: {str(e)}"}), 500
+
+
+# ---------------------- EXPORTAÇÃO XML (RF8) ---------------------------
+
+@api_bp.get("/api/exportar/xml")
+def api_exportar_xml():
+    """
+    Query params:
+      inicio=2025-10-24T00:00:00Z
+      fim=2025-10-24T23:59:59Z
+    ou apenas data 'YYYY-MM-DD'.
+    """
+    inicio_str = request.args.get("inicio")
+    fim_str = request.args.get("fim")
+
+    if not inicio_str or not fim_str:
+        return jsonify({"error": "Parâmetros 'inicio' e 'fim' são obrigatórios."}), 400
+
+    def parse_dt(s: str) -> datetime:
+        # se vier só data (YYYY-MM-DD)
+        if len(s) == 10:
+            return datetime.fromisoformat(s + "T00:00:00+00:00")
+        return datetime.fromisoformat(s.replace("Z", "+00:00"))
+
+    try:
+        dt_inicio = parse_dt(inicio_str)
+        dt_fim = parse_dt(fim_str)
+    except Exception:
+        return jsonify({"error": "Formato de data inválido. Use ISO 8601."}), 400
+
+    if dt_inicio > dt_fim:
+        return jsonify({"error": "Data inicial não pode ser maior que a final."}), 400
+
+    try:
+        xml_bytes = xml_service.exportar_leituras_filtradas(dt_inicio, dt_fim)
+        return Response(
+            xml_bytes,
+            mimetype="application/xml",
+            headers={
+                "Content-Disposition": "attachment; filename=leituras_filtradas.xml"
+            },
+        )
+    except Exception as e:
+        return jsonify({"error": f"Erro ao exportar XML: {str(e)}"}), 500

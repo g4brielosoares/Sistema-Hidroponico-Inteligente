@@ -279,6 +279,13 @@ async function carregarLeiturasTabelaSimples() {
   });
 }
 
+function toIsoWithZFromLocal(localValue) {
+  // localValue vem do input datetime-local (ex: "2025-10-24T10:00")
+  if (!localValue) return null;
+  // assume timezone local como UTC para fins acadêmicos
+  return localValue + ":00Z";
+}
+
 function initAlertasPage() {
   const marker = document.getElementById("page-alertas");
   if (!marker) return;
@@ -305,6 +312,32 @@ function initAlertasPage() {
     await carregarLeiturasTabelaSimples();
     await carregarAlertasTabela();
   });
+
+  const btnExport = document.getElementById("btn-exportar-xml");
+  const inputInicio = document.getElementById("exportInicio");
+  const inputFim = document.getElementById("exportFim");
+
+  if (btnExport) {
+    btnExport.addEventListener("click", () => {
+      const inicioLocal = inputInicio.value;
+      const fimLocal = inputFim.value;
+
+      if (!inicioLocal || !fimLocal) {
+        alert("Preencha as datas de início e fim.");
+        return;
+      }
+
+      const inicioIso = toIsoWithZFromLocal(inicioLocal);
+      const fimIso = toIsoWithZFromLocal(fimLocal);
+
+      const url = `/api/exportar/xml?inicio=${encodeURIComponent(
+        inicioIso
+      )}&fim=${encodeURIComponent(fimIso)}`;
+
+      // abre o download do XML em nova aba
+      window.open(url, "_blank");
+    });
+  }
 }
 
   // carga inicial

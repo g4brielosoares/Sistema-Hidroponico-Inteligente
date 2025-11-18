@@ -12,6 +12,7 @@
             </xs:sequence>
           </xs:complexType>
         </xs:element>
+
         <xs:element name="sensores">
           <xs:complexType>
             <xs:sequence>
@@ -29,6 +30,7 @@
             </xs:sequence>
           </xs:complexType>
         </xs:element>
+
         <xs:element name="leituras">
           <xs:complexType>
             <xs:sequence>
@@ -45,6 +47,7 @@
             </xs:sequence>
           </xs:complexType>
         </xs:element>
+
         <xs:element name="atuadores" minOccurs="0">
           <xs:complexType>
             <xs:sequence>
@@ -52,11 +55,17 @@
                 <xs:complexType>
                   <xs:sequence>
                     <xs:element name="tipo" type="xs:string"/>
-                    <xs:element name="ultimoComando" minOccurs="0">
+                    <xs:element name="comandos" minOccurs="0">
                       <xs:complexType>
                         <xs:sequence>
-                          <xs:element name="dataHora" type="xs:dateTime"/>
-                          <xs:element name="comando" type="xs:string"/>
+                          <xs:element name="comando" maxOccurs="unbounded">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="dataHora" type="xs:dateTime"/>
+                                <xs:element name="acao" type="xs:string"/>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
                         </xs:sequence>
                       </xs:complexType>
                     </xs:element>
@@ -67,6 +76,7 @@
             </xs:sequence>
           </xs:complexType>
         </xs:element>
+
       </xs:sequence>
       <xs:attribute name="id" type="xs:string" use="required"/>
     </xs:complexType>
