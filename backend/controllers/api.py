@@ -10,7 +10,7 @@ api_bp = Blueprint("api", __name__)
 xml_service = XMLService()
 
 
-# ---------- helper de autenticação de dispositivo ----------
+# helper de autenticação de dispositivo
 
 def require_device_auth(f):
     @wraps(f)
@@ -22,7 +22,7 @@ def require_device_auth(f):
     return wrapper
 
 
-# ---------------------- SENSORES ---------------------------
+# SENSORES 
 
 @api_bp.get("/api/sensores")
 def api_listar_sensores():
@@ -60,7 +60,7 @@ def api_limpar_sensores():
         return jsonify({"error": f"Erro ao limpar sensores: {str(e)}"}), 500
 
 
-# ---------------------- ATUADORES ---------------------------
+# ATUADORES
 
 @api_bp.get("/api/atuadores")
 def api_listar_atuadores():
@@ -95,7 +95,7 @@ def api_limpar_atuadores():
     except Exception as e:
         return jsonify({"error": f"Erro ao limpar atuadores: {str(e)}"}), 500
 
-# ---------------------- HISTÓRICO DE COMANDOS ---------------------------
+# HISTÓRICO DE COMANDOS 
 
 @api_bp.get("/api/atuadores/comandos")
 def api_listar_comandos():
@@ -118,7 +118,7 @@ def api_limpar_comandos():
         return jsonify({"error": f"Erro ao limpar histórico de comandos: {str(e)}"}), 500
 
 
-# ---------------------- LEITURAS / ALERTAS ---------------------------
+# LEITURAS / ALERTAS 
 
 @api_bp.get("/api/leituras")
 def api_listar_leituras():
@@ -141,7 +141,7 @@ def api_listar_alertas():
     return jsonify(alertas)
 
 
-# ---------------------- SIMULAÇÃO (gateway) ---------------------------
+# SIMULAÇÃO (gateway) 
 
 @api_bp.post("/api/simulacao/tick")
 @require_device_auth
@@ -163,7 +163,7 @@ def api_sync_pendentes():
         return jsonify({"error": f"Erro na sincronização: {str(e)}"}), 500
 
 
-# ---------------------- EXPORTAÇÃO XML (RF8) ---------------------------
+# EXPORTAÇÃO XML (RF8) 
 
 @api_bp.get("/api/exportar/xml")
 def api_exportar_xml():

@@ -1,6 +1,6 @@
 // frontend/static/js/dashboard.js
 
-// ======================= HELPERS DE API =======================
+// HELPERS DE API
 
 async function apiGet(url) {
   const resp = await fetch(url);
@@ -27,7 +27,7 @@ async function apiPost(url, body = {}, { asDevice = false } = {}) {
 
   if (asDevice) {
     // MESMO VALOR definido em Config.DEVICE_API_KEY no backend
-    headers["X-API-KEY"] = "MEU_TOKEN_DISPOSITIVO_SUPER_SECRETO";
+    headers["X-API-KEY"] = "DEVICE-KEY";
   }
 
   const resp = await fetch(url, {
@@ -45,7 +45,7 @@ async function apiPost(url, body = {}, { asDevice = false } = {}) {
   return { status: resp.status, data };
 }
 
-// ======================= HELPERS DE FORMATAÇÃO =======================
+// HELPERS DE FORMATAÇÃO 
 
 function formatUnidade(unidade) {
   if (!unidade) return "-";
@@ -81,7 +81,7 @@ function formatValor(v) {
   });
 }
 
-// ======================= SENSORES =======================
+// SENSORES 
 
 async function carregarSensores() {
   const tabela = document.getElementById("tabela-sensores");
@@ -185,7 +185,7 @@ function initSensoresPage() {
   carregarSensores();
 }
 
-// ======================= ATUADORES =======================
+// ATUADORES 
 
 async function carregarAtuadores() {
   const tabela = document.getElementById("tabela-atuadores");
@@ -345,7 +345,7 @@ function initAtuadoresPage() {
   carregarComandos();
 }
 
-// ========= LEITURAS / ALERTAS (PÁGINA ALERTAS) ==========
+// LEITURAS / ALERTAS (PÁGINA ALERTAS)
 
 async function carregarLeituras() {
   const tabela = document.getElementById("tabela-leituras");
@@ -456,10 +456,10 @@ function initAlertasPage() {
   tickSimulacao();
 
   // intervalo periódico
-  setInterval(tickSimulacao, 5000);
+  setInterval(tickSimulacao, 10000);
 }
 
-// ======================= BOOTSTRAP =======================
+// BOOTSTRAP 
 
 document.addEventListener("DOMContentLoaded", () => {
   initSensoresPage();

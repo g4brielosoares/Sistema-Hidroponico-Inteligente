@@ -5,7 +5,7 @@ XML_DIR = os.path.join(BASE_DIR, "xml")
 
 
 class Config:
-    SECRET_KEY = "uma-secret-key-qualquer"
+    SECRET_KEY = "key"
 
     # arquivos principais
     XML_SCHEMA_PATH = os.path.join(XML_DIR, "hidroponia.xsd")
@@ -15,4 +15,4 @@ class Config:
     XML_PENDING_PATH = os.path.join(XML_DIR, "leituras_pendentes.xml")
 
     # chave de autenticação dos "dispositivos" (gateway/simulador)
-    DEVICE_API_KEY = "MEU_TOKEN_DISPOSITIVO_SUPER_SECRETO"
+    DEVICE_API_KEY = "DEVICE-KEY"
