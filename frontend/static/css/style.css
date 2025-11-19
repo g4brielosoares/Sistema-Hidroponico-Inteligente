@@ -92,6 +92,7 @@ body.dark-theme {
   border-radius: 8px;
   padding: 0.6rem;
   font-size: 0.9rem;
+  align-self: center;
 }
 
 .filtro input:focus,
@@ -99,6 +100,11 @@ body.dark-theme {
   outline: none;
   border-color: #22c55e;
   box-shadow: 0 0 0 1px #22c55e33;
+}
+
+.main h1 {
+  margin: 0;
+  margin-left: 1.5rem;
 }
 
 .campo input,

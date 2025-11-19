@@ -3,48 +3,72 @@
 {% block title %}Atuadores - Sistema Hidropônico{% endblock %}
 
 {% block content %}
-  <div id="page-atuadores"></div>
+  <h1>Atuadores</h1>
 
+  <!-- Card: cadastro de atuador -->
   <section class="card">
-    <div class="card-header">
-      <h2>Cadastro de Atuadores</h2>
-    </div>
-    <form id="form-atuador">
+    <h2>Cadastrar Atuador</h2>
+    <form id="form-atuador" class="form-grid">
       <div class="campo">
         <label for="atuadorId">ID do Atuador</label>
-        <input type="text" id="atuadorId" name="atuadorId" placeholder="a-bomba-01" required>
+        <input type="text" id="atuadorId" placeholder="ex: a-bomba-01" required />
       </div>
-
       <div class="campo">
         <label for="atuadorTipo">Tipo</label>
-        <select id="atuadorTipo" name="atuadorTipo" required>
-          <option value="">Selecione</option>
-          <option value="bombaNutrientes">Bomba de nutrientes</option>
-          <option value="valvula">Válvula</option>
-          <option value="dosador">Dosador</option>
-        </select>
+        <input type="text" id="atuadorTipo" placeholder="ex: bombaNutrientes" required />
       </div>
-
-      <button type="submit" class="btn-primary">Salvar Atuador</button>
-      <span id="status-atuador" class="status-msg"></span>
+      <div class="acoes-form">
+        <button type="submit" class="btn-primary">Salvar Atuador</button>
+        <button type="button" id="btn-limpar-atuadores" class="btn-danger">
+          Limpar atuadores
+        </button>
+      </div>
+      <p id="status-atuador" class="status"></p>
     </form>
   </section>
 
+  <!-- Card: lista de atuadores -->
+  <section class="card">
+    <h2>Atuadores Cadastrados</h2>
+    <div class="tabela-wrapper">
+      <table id="tabela-atuadores" class="tabela">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Tipo</th>
+            <th>Último comando</th>
+            <th>Total de comandos</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- preenchido via JS -->
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Card: histórico de operações -->
   <section class="card">
     <div class="card-header">
-      <h2>Atuadores e comandos</h2>
-      <button id="btn-limpar-atuadores" class="btn-danger">Limpar atuadores (XML)</button>
+      <h2>Histórico de operações dos atuadores</h2>
+      <button id="btn-limpar-historico-comandos" class="btn-danger">
+        Limpar histórico de operações
+      </button>
     </div>
-
-    <table id="tabela-atuadores" class="tabela">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Tipo</th>
-          <th>Comandos Registrados</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+    <div class="tabela-wrapper">
+      <table id="tabela-comandos" class="tabela">
+        <thead>
+          <tr>
+            <th>Atuador</th>
+            <th>Tipo</th>
+            <th>Ação</th>
+            <th>Data/Hora</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- preenchido via JS -->
+        </tbody>
+      </table>
+    </div>
   </section>
 {% endblock %}

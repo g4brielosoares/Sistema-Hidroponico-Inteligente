@@ -3,7 +3,7 @@
 {% block title %}Sensores - Sistema Hidropônico{% endblock %}
 
 {% block content %}
-  <div id="page-sensores"></div>
+  <h1>Sensores</h1>
 
   <section class="card">
     <div class="card-header">
@@ -12,7 +12,7 @@
     <form id="form-sensor">
       <div class="campo">
         <label for="sensorId">ID do Sensor</label>
-        <input type="text" id="sensorId" name="sensorId" placeholder="s-ph-01" required>
+        <input type="text" id="sensorId" name="sensorId" placeholder="ex: s-ph-01" required>
       </div>
 
       <div class="campo">
@@ -28,19 +28,13 @@
       </div>
 
       <div class="campo">
-        <label>Unidade</label>
-        <input type="text" value="Definida automaticamente pelo tipo do sensor" disabled>
-      </div>
-
-
-      <div class="campo">
         <label for="sensorModelo">Modelo</label>
-        <input type="text" id="sensorModelo" name="sensorModelo" placeholder="PHX100">
+        <input type="text" id="sensorModelo" name="sensorModelo" placeholder="ex: PHX100">
       </div>
 
       <div class="campo">
         <label for="sensorLocal">Localização</label>
-        <input type="text" id="sensorLocal" name="sensorLocal" placeholder="tanque principal">
+        <input type="text" id="sensorLocal" name="sensorLocal" placeholder="ex: Tanque principal">
       </div>
 
       <button type="submit" class="btn-primary">Salvar Sensor</button>
@@ -51,7 +45,7 @@
   <section class="card">
     <div class="card-header">
       <h2>Sensores Cadastrados</h2>
-      <button id="btn-limpar-sensores" class="btn-danger">Limpar sensores (XML)</button>
+      <button id="btn-limpar-sensores" class="btn-danger">Limpar sensores</button>
     </div>
 
     <table id="tabela-sensores" class="tabela">

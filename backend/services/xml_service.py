@@ -43,9 +43,7 @@ class XMLService:
         # Garante arquivo de pendências
         self._init_pending_file()
 
-    # ------------------------------------------------------------------
     # Helpers internos
-    # ------------------------------------------------------------------
 
     def _load_tree(self) -> etree._ElementTree:
         tree = etree.parse(self.data_path, parser=self.parser)
@@ -61,7 +59,7 @@ class XMLService:
             pretty_print=True,
         )
 
-    # ---------- pendências (fila offline) ----------
+    # PENDENCIAS (fila offline - RNF5)
 
     def _init_pending_file(self):
         if not os.path.exists(self.pending_path):
@@ -161,9 +159,7 @@ class XMLService:
         self._save_pending_tree(pend_tree)
         return transferidas
 
-    # ------------------------------------------------------------------
     # SENSORES
-    # ------------------------------------------------------------------
 
     def listar_sensores(self):
         tree = self._load_tree()
@@ -223,9 +219,7 @@ class XMLService:
 
         self._save_tree(tree)
 
-    # ------------------------------------------------------------------
     # ATUADORES
-    # ------------------------------------------------------------------
 
     def listar_atuadores(self):
         tree = self._load_tree()
@@ -282,21 +276,91 @@ class XMLService:
         self._save_tree(tree)
 
     def limpar_atuadores(self) -> None:
+        """
+        Remove completamente o elemento <atuadores> do XML.
+        Isso é válido porque, no XSD, <atuadores> tem minOccurs=0.
+        """
         tree = self._load_tree()
         root = tree.getroot()
         atuadores_el = root.find("atuadores")
+
         if atuadores_el is not None:
-            for a in list(atuadores_el.findall("atuador")):
-                atuadores_el.remove(a)
+            root.remove(atuadores_el)
+
         self._save_tree(tree)
 
-    # ------------------------------------------------------------------
+    # HISTÓRICO DE COMANDOS DE ATUADORES
+
+    def listar_comandos(self):
+        """
+        Retorna o histórico de comandos de todos os atuadores.
+        Formato:
+        [
+          {
+            "atuadorId": "a-bomba-01",
+            "tipo": "bombaNutrientes",
+            "dataHora": "2025-10-24T09:45:00Z",
+            "acao": "ligar"
+          },
+          ...
+        ]
+        Ordenado do mais recente para o mais antigo.
+        """
+        tree = self._load_tree()
+        root = tree.getroot()
+        atuadores_el = root.find("atuadores")
+
+        if atuadores_el is None:
+            return []
+
+        comandos_lista = []
+
+        for a in atuadores_el.findall("atuador"):
+            atuador_id = a.get("id")
+            tipo = a.findtext("tipo")
+            comandos_el = a.find("comandos")
+            if comandos_el is None:
+                continue
+
+            for c in comandos_el.findall("comando"):
+                data_hora = c.findtext("dataHora")
+                acao = c.findtext("acao")
+                comandos_lista.append(
+                    {
+                        "atuadorId": atuador_id,
+                        "tipo": tipo,
+                        "dataHora": data_hora,
+                        "acao": acao,
+                    }
+                )
+
+        # ordena por dataHora desc
+        comandos_lista.sort(key=lambda x: x["dataHora"] or "", reverse=True)
+        return comandos_lista
+
+    def limpar_historico_comandos(self) -> None:
+        """
+        Remove todos os comandos (histórico) de todos os atuadores,
+        mas mantém os atuadores cadastrados.
+        """
+        tree = self._load_tree()
+        root = tree.getroot()
+        atuadores_el = root.find("atuadores")
+
+        if atuadores_el is not None:
+            for a in atuadores_el.findall("atuador"):
+                comandos_el = a.find("comandos")
+                if comandos_el is not None:
+                    a.remove(comandos_el)
+
+        self._save_tree(tree)
+
+
     # LEITURAS / ALERTAS
-    # ------------------------------------------------------------------
 
     def listar_leituras(self):
         """
-        Retorna leituras como lista de dicts:
+        Retorna leituras como lista:
         {
           "sensorId": ...,
           "tipo": ...,
@@ -428,9 +492,7 @@ class XMLService:
         alertas.sort(key=lambda x: x["dataHora"], reverse=True)
         return alertas
 
-    # ------------------------------------------------------------------
     # SIMULAÇÃO DE CICLO (leituras + comandos)
-    # ------------------------------------------------------------------
 
     def simular_ciclo(self):
         """
@@ -517,9 +579,7 @@ class XMLService:
 
         return novas_leituras
 
-    # ------------------------------------------------------------------
     # EXPORTAÇÃO DE LEITURAS EM XML (RF8)
-    # ------------------------------------------------------------------
 
     def exportar_leituras_filtradas(self, dt_inicio: datetime, dt_fim: datetime) -> bytes:
         """

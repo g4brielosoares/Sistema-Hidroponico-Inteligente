@@ -215,13 +215,38 @@ async function carregarAtuadores() {
   });
 }
 
+async function carregarComandos() {
+  const tabela = document.getElementById("tabela-comandos");
+  if (!tabela) return;
+
+  const tbody = tabela.querySelector("tbody");
+  const { status, data } = await apiGet("/api/atuadores/comandos");
+  if (status !== 200) return;
+
+  tbody.innerHTML = "";
+
+  data.forEach((c) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${c.atuadorId}</td>
+      <td>${c.tipo || "-"}</td>
+      <td>${c.acao || "-"}</td>
+      <td>${formatDataHora(c.dataHora)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
 function initAtuadoresPage() {
   const form = document.getElementById("form-atuador");
-  const tabela = document.getElementById("tabela-atuadores");
-  if (!form || !tabela) return;
+  const tabelaAtuadores = document.getElementById("tabela-atuadores");
+  if (!form || !tabelaAtuadores) return; // não está na página de atuadores
 
   const statusSpan = document.getElementById("status-atuador");
-  const btnLimpar = document.getElementById("btn-limpar-atuadores");
+  const btnLimparAtuadores = document.getElementById("btn-limpar-atuadores");
+  const btnLimparHistorico = document.getElementById(
+    "btn-limpar-historico-comandos"
+  );
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -259,10 +284,11 @@ function initAtuadoresPage() {
     }
   });
 
-  if (btnLimpar) {
-    btnLimpar.addEventListener("click", async () => {
+  // limpar todos os atuadores (XML)
+  if (btnLimparAtuadores) {
+    btnLimparAtuadores.addEventListener("click", async () => {
       const confirma = confirm(
-        "Tem certeza que deseja limpar os atuadores do XML?"
+        "Tem certeza que deseja remover TODOS os atuadores do XML?"
       );
       if (!confirma) return;
 
@@ -274,6 +300,7 @@ function initAtuadoresPage() {
           statusSpan.classList.add("ok");
         }
         await carregarAtuadores();
+        await carregarComandos(); // histórico some também
       } else {
         if (statusSpan) {
           statusSpan.textContent = data.error || "Erro ao limpar atuadores.";
@@ -284,10 +311,41 @@ function initAtuadoresPage() {
     });
   }
 
+  // limpar apenas o histórico de comandos
+  if (btnLimparHistorico) {
+    btnLimparHistorico.addEventListener("click", async () => {
+      const confirma = confirm(
+        "Tem certeza que deseja limpar apenas o histórico de operações dos atuadores?"
+      );
+      if (!confirma) return;
+
+      const { status, data } = await apiDelete("/api/atuadores/comandos");
+      if (status === 200) {
+        if (statusSpan) {
+          statusSpan.textContent =
+            data.message || "Histórico de operações limpo.";
+          statusSpan.classList.remove("erro");
+          statusSpan.classList.add("ok");
+        }
+        await carregarAtuadores();
+        await carregarComandos();
+      } else {
+        if (statusSpan) {
+          statusSpan.textContent =
+            data.error || "Erro ao limpar histórico de operações.";
+          statusSpan.classList.remove("ok");
+          statusSpan.classList.add("erro");
+        }
+      }
+    });
+  }
+
+  // primeira carga
   carregarAtuadores();
+  carregarComandos();
 }
 
-// ======================= LEITURAS / ALERTAS (PÁGINA ALERTAS) =======================
+// ========= LEITURAS / ALERTAS (PÁGINA ALERTAS) ==========
 
 async function carregarLeituras() {
   const tabela = document.getElementById("tabela-leituras");

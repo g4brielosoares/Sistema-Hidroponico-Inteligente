@@ -95,6 +95,28 @@ def api_limpar_atuadores():
     except Exception as e:
         return jsonify({"error": f"Erro ao limpar atuadores: {str(e)}"}), 500
 
+# ---------------------- HISTÓRICO DE COMANDOS ---------------------------
+
+@api_bp.get("/api/atuadores/comandos")
+def api_listar_comandos():
+    """
+    Lista o histórico de comandos de todos os atuadores.
+    """
+    comandos = xml_service.listar_comandos()
+    return jsonify(comandos)
+
+
+@api_bp.delete("/api/atuadores/comandos")
+def api_limpar_comandos():
+    """
+    Limpa o histórico de comandos dos atuadores (mantendo os atuadores).
+    """
+    try:
+        xml_service.limpar_historico_comandos()
+        return jsonify({"message": "Histórico de comandos dos atuadores limpo no XML."})
+    except Exception as e:
+        return jsonify({"error": f"Erro ao limpar histórico de comandos: {str(e)}"}), 500
+
 
 # ---------------------- LEITURAS / ALERTAS ---------------------------
 
