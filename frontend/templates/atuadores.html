@@ -19,9 +19,6 @@
       </div>
       <div class="acoes-form">
         <button type="submit" class="btn-primary">Salvar Atuador</button>
-        <button type="button" id="btn-limpar-atuadores" class="btn-danger">
-          Limpar atuadores
-        </button>
       </div>
       <p id="status-atuador" class="status"></p>
     </form>
@@ -29,7 +26,12 @@
 
   <!-- Card: lista de atuadores -->
   <section class="card">
-    <h2>Atuadores Cadastrados</h2>
+    <div class="card-header">
+      <h2>Atuadores Cadastrados</h2>
+      <button type="button" id="btn-limpar-atuadores" class="btn-danger">
+        Limpar atuadores
+      </button>
+    </div>
     <div class="tabela-wrapper">
       <table id="tabela-atuadores" class="tabela">
         <thead>
@@ -47,12 +49,12 @@
     </div>
   </section>
 
-  <!-- Card: histórico de operações -->
+  <!-- Card: histórico de comandos -->
   <section class="card">
     <div class="card-header">
-      <h2>Histórico de operações dos atuadores</h2>
+      <h2>Histórico de comandos dos atuadores</h2>
       <button id="btn-limpar-historico-comandos" class="btn-danger">
-        Limpar histórico de operações
+        Limpar comandos
       </button>
     </div>
     <div class="tabela-wrapper">

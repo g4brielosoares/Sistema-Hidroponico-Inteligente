@@ -214,12 +214,19 @@ body.theme-dark .tabela tr.fora-faixa {
 .status {
   font-size: 0.85rem;
   margin: 0;
+  display: none;
 }
 
 .status.ok {
   color: #4ade80;
+  display: block;
 }
 
 .status.erro {
   color: #fca5a5;
+  display: block;
+}
+
+.highlight {
+  color: #22c55e;
 }

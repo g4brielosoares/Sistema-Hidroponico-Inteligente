@@ -2,12 +2,12 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>{% block title %}Sistema Hidropônico Inteligente{% endblock %}</title>
+  <title>{% block title %}HidroponIA{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body class="dark-theme">
   <header class="header">
-    <h1>Sistema Hidropônico Inteligente</h1>
+    <h1>Hidropon<span class="highlight">IA</span></h1>
     <nav class="nav">
       <a href="{{ url_for('views.sensores') }}">Sensores</a>
       <a href="{{ url_for('views.atuadores') }}">Atuadores</a>
